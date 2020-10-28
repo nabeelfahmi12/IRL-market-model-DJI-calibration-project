@@ -17,81 +17,90 @@ In this project you will:
 
 - **Part 3**: Repeated the analysis for the S&P portfolio. We have build a data file, build signals, and repeat the model estimation process with our new dataset.
 
-```markdown
+
 ## The IRL-based model of stock returns
 
 We know that optimal investment policy in the problem of inverse portfolio optimization is a Gaussian policy
 
-$$ \pi_{\theta}({\bf a}_t |{\bf y}_t ) =   \mathcal{N}\left({\bf a}_t | \bf{A}_0 + \bf{A}_1 {\bf y}_t, \Sigma_p \right) $$
+𝜋𝜃(𝐚𝑡|𝐲𝑡)=(𝐚𝑡|𝐀0+𝐀1𝐲𝐭,𝚺𝐩)
 
-Here $ {\bf y}_t $ is a vector of dollar position in the portfolio, and $ \bf{A}_0 $, $ \bf{A}_1 $ and $ \Sigma_p $ are parameters defining a Gaussian policy.   
+Here 𝐲𝑡
+is a vector of dollar position in the portfolio, and 𝐀0, 𝐀1 and Σ𝑝
 
-We know that such Gaussian policy is found for both cases of a single investor and a market portfolio. We also sketched a numerical scheme that can iteratively compute coefficients $ \bf{A}_0$, $ \bf{A}_1 $ and $ \Sigma_p $ using a combination of a RL algorithm called G-learning and a trajectory optimization algorithm.
+are parameters defining a Gaussian policy.
+
+We know that such Gaussian policy is found for both cases of a single investor and a market portfolio. We also sketched a numerical scheme that can iteratively compute coefficients 𝐀0
+, 𝐀1 and Σ𝑝
+
+using a combination of a RL algorithm called G-learning and a trajectory optimization algorithm.
 
 In this project, we will explore implications and estimation of this IRL-based model for the most interesting case - the market portfolio. It turns out that for this case, the model can be estimated in an easier way using a conventional Maximum Likelihood approach. To this end, we will re-formulate the model for this particular case in three easy steps.
 
+Recall that for a vector of 𝑁
+stocks, we introduced a size 2𝑁-action vector 𝐚𝑡=[𝐮(+)𝑡,𝐮(−)𝑡], so that an action 𝐮𝑡 was defined as a difference of two non-negative numbers 𝐮𝑡=𝐮(+)𝑡−𝐮(−)𝑡=[1,−1]𝐚𝑡≡1𝑇−1𝐚𝑡
 
-Recall that for a vector of $ N $ stocks, we introduced a size $ 2 N $-action vector 
-$ {\bf a}_t = [{\bf u}_t^{(+)}, {\bf u}_t^{(-)}] $, so that an action $ {\bf u}_t $ was defined as a difference of two non-negative numbers 
-$ {\bf u}_t = {\bf u}_t^{(+)} -  {\bf u}_t^{(-)} = [{\bf 1}, - {\bf 1}] {\bf a}_t \equiv {\bf 1}_{-1}^{T} {\bf a}_t $.
+.
 
-Therefore, the joint distribution of $ {\bf a}_t = [{\bf u}_t^{(+)}, {\bf u}_t^{(-)} ] $ is given by our Gaussian policy
-$  \pi_{\theta}({\bf a}_t |{\bf y}_t ) $. This means that the distribution of 
-$ {\bf u}_t = {\bf u}_t^{(+)} -  {\bf u}_t^{(-)} $ is also Gaussian. Let us write it therefore as follows:
+Therefore, the joint distribution of 𝐚𝑡=[𝐮(+)𝑡,𝐮(−)𝑡]
+is given by our Gaussian policy 𝜋𝜃(𝐚𝑡|𝐲𝑡). This means that the distribution of 𝐮𝑡=𝐮(+)𝑡−𝐮(−)𝑡
 
-$$
-\pi_{\theta}({\bf u}_t |{\bf y}_t ) =   \mathcal{N}\left({\bf u}_t | \bf{U}_0 + \bf{U}_1 {\bf y}_t, \Sigma_u \right) 
-$$
+is also Gaussian. Let us write it therefore as follows:
 
-Here $ \bf{U}_0 = {\bf 1}_{-1}^{T}  \bf{A}_0 $ and $ \bf{U}_1 =  {\bf 1}_{-1}^{T}  \bf{A}_1 $.
+𝜋𝜃(𝐮𝑡|𝐲𝑡)=(𝐮𝑡|𝐔0+𝐔1𝐲𝐭,𝚺𝐮)
 
-This means that $ {\bf u}_t $ is a Gaussian random variable that we can write as follows:
+Here 𝐔0=1𝐓−1𝐀0
+and 𝐔1=1𝐓−1𝐀1
 
-$$
-{\bf u}_t = \bf{U}_0 + \bf{U}_1 {\bf y}_t + \varepsilon_t^{(u)}  = \bf{U}_0 + \bf{U}_1^{(x)} {\bf x}_t + \bf{U}_1^{(z)} {\bf z}_t + \varepsilon_t^{(u)} 
-$$
+.
 
-where $ \varepsilon_t^{(u)} \sim \mathcal{N}(0,\Sigma_u) $ is a Gaussian random noise.  
+This means that 𝐮𝑡
 
-The most important feature of this expression that we need going forward is is linear dependence on the state $ {\bf x}_t $. 
-This is the only result that we will use in order to construct a simple dynamic market model resulting from our IRL model. We use a deterministic limit of this equation, where in addition we set $ \bf{U}_0 = \bf{U}_1^{(z)} = 0 $, and replace $ \bf{U}_1^{(x)} \rightarrow \phi $ to simplify the notation. We thus obtain a simple deterministic policy
+is a Gaussian random variable that we can write as follows:
 
-$$
-\label{determ_u}
-{\bf u}_t =  \phi  {\bf x}_t 
-$$
+𝐮𝑡=𝐔0+𝐔1𝐲𝐭+𝜀(𝐮)𝐭=𝐔0+𝐔(𝐱)1𝐱𝐭+𝐔(𝐳)1𝐳𝐭+𝜀(𝐮)𝐭
 
-Next, let us recall the state equation and return equation (where we reinstate a time step $ \Delta t $,
-and $ \circ $ stands for an element-wise (Hadamard) product):
+where 𝜀(𝑢)𝑡∼(0,Σ𝑢)
 
-$$
-X_{t+ \Delta t} = (1 + r_t \Delta t) \circ (  X_t +  u_t  \Delta t)  
-$$
-$$
-r_t   = r_f + {\bf w} {\bf z}_t -  \mu  u_t + \frac{\sigma}{ \sqrt{ \Delta t}} \varepsilon_t 
-$$
-where $ r_f $ is a risk-free rate, $ \Delta t $ is a time step, $ {\bf z}_t $ is a vector of predictors with weights $ {\bf w} $, $ \mu $ is a market impact parameter with a linear impact specification, and $ \varepsilon_t \sim \mathcal{N} (\cdot| 0, 1) $ is a white noise residual.
+is a Gaussian random noise.
 
+The most important feature of this expression that we need going forward is is linear dependence on the state 𝐱𝑡
+. This is the only result that we will use in order to construct a simple dynamic market model resulting from our IRL model. We use a deterministic limit of this equation, where in addition we set 𝐔0=𝐔(𝐳)1=0, and replace 𝐔(𝐱)1→𝜙
 
-Eliminating $ u_t $ from these expressions and simplifying, we obtain
-$$ \Delta  X_t = \mu  \phi  ( 1 + \phi \Delta t) \circ  X_t \circ \left(  \frac{r_f (1 + \phi \Delta t)  + \phi}{ \mu \phi (1+ \phi \Delta t )}  -  X_t \right) \Delta t + 
-( 1 + \phi \Delta t) X_t  \circ \left[ {\bf w} {\bf z}_t  \Delta t +  \sigma \sqrt{ \Delta t} \varepsilon_t \right]
-$$
-Finally, assuming that $ \phi \Delta t \ll 1 $ and taking the continuous-time limit $  \Delta t \rightarrow dt $, we obtain 
+to simplify the notation. We thus obtain a simple deterministic policy
 
-$$
-d X_t = \kappa \circ X_t \circ \left( \frac{\theta}{\kappa} - X_t \right) dt +  X_t \circ \left[ {\bf w} {\bf z}_t \, dt + \sigma d W_t \right]
-$$
-where $\kappa   =   \mu  \phi $, $ \theta  =   r_f + \phi $, and $ W_t $ is a standard Brownian motion.
+𝐮𝑡=𝜙𝐱𝑡
 
-Please note that this equation describes dynamics with a quadratic mean reversion. It is quite different from models with linear mean reversion such as the Ornstein-Uhlenbeck (OU) process. 
+Next, let us recall the state equation and return equation (where we reinstate a time step Δ𝑡
+, and ∘
 
-Without signals $ {\bf z}_t $, this process is known in the literature as a Geometric Mean Reversion (GMR) process. It has been used (for a one-dimensional setting) by Dixit and Pyndick (" Investment Under Uncertainty", Princeton 1994), and investigated (also for 1D) by Ewald and Yang ("Geometric Mean Reversion: Formulas for the Equilibrium Density and Analytic Moment Matching", {\it University of 
-St. Andrews Economics Preprints}, 2007). We have found that such dynamics (in a multi-variate setting) can also be obtained for market caps (or equivalently for stock prices, so long as the number of shares is held fixed) using Inverse Reinforcement Learning! 
+stands for an element-wise (Hadamard) product):
 
-(For more details, see I. Halperin and I. Feldshteyn, "Market Self-Learning of Signals, Impact and Optimal Trading: Invisible Hand Inference with Free Energy.
-(or, How We Learned to Stop Worrying and Love Bounded Rationality)", https://papers.ssrn.com/sol3/papers.cfm?abstract\_id=3174498) 
-```
+𝑋𝑡+Δ𝑡=(1+𝑟𝑡Δ𝑡)∘(𝑋𝑡+𝑢𝑡Δ𝑡)
+𝑟𝑡=𝑟𝑓+𝐰𝐳𝑡−𝜇𝑢𝑡+𝜎Δ𝑡⎯⎯⎯⎯√𝜀𝑡
+where 𝑟𝑓 is a risk-free rate, Δ𝑡 is a time step, 𝐳𝑡 is a vector of predictors with weights 𝐰, 𝜇 is a market impact parameter with a linear impact specification, and 𝜀𝑡∼(⋅|0,1)
+
+is a white noise residual.
+
+Eliminating 𝑢𝑡
+from these expressions and simplifying, we obtain
+Δ𝑋𝑡=𝜇𝜙(1+𝜙Δ𝑡)∘𝑋𝑡∘(𝑟𝑓(1+𝜙Δ𝑡)+𝜙𝜇𝜙(1+𝜙Δ𝑡)−𝑋𝑡)Δ𝑡+(1+𝜙Δ𝑡)𝑋𝑡∘[𝐰𝐳𝑡Δ𝑡+𝜎Δ𝑡⎯⎯⎯⎯√𝜀𝑡]
+Finally, assuming that 𝜙Δ𝑡≪1 and taking the continuous-time limit Δ𝑡→𝑑𝑡
+
+, we obtain
+
+𝑑𝑋𝑡=𝜅∘𝑋𝑡∘(𝜃𝜅−𝑋𝑡)𝑑𝑡+𝑋𝑡∘[𝐰𝐳𝑡𝑑𝑡+𝜎𝑑𝑊𝑡]
+where 𝜅=𝜇𝜙, 𝜃=𝑟𝑓+𝜙, and 𝑊𝑡
+
+is a standard Brownian motion.
+
+Please note that this equation describes dynamics with a quadratic mean reversion. It is quite different from models with linear mean reversion such as the Ornstein-Uhlenbeck (OU) process.
+
+Without signals 𝐳𝑡
+
+, this process is known in the literature as a Geometric Mean Reversion (GMR) process. It has been used (for a one-dimensional setting) by Dixit and Pyndick (" Investment Under Uncertainty", Princeton 1994), and investigated (also for 1D) by Ewald and Yang ("Geometric Mean Reversion: Formulas for the Equilibrium Density and Analytic Moment Matching", {\it University of St. Andrews Economics Preprints}, 2007). We have found that such dynamics (in a multi-variate setting) can also be obtained for market caps (or equivalently for stock prices, so long as the number of shares is held fixed) using Inverse Reinforcement Learning!
+
+(For more details, see I. Halperin and I. Feldshteyn, "Market Self-Learning of Signals, Impact and Optimal Trading: Invisible Hand Inference with Free Energy. (or, How We Learned to Stop Worrying and Love Bounded Rationality)", https://papers.ssrn.com/sol3/papers.cfm?abstract\_id=3174498)  
+
 ## Conclusion:
 
 ### Part 1 
