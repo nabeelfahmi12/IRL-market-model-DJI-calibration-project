@@ -16,7 +16,7 @@ In this project you will:
 - **Part 2**: Propose other signals and investigate the dynamics for market caps obtained with alternative signals. Present your conclusions and observations.
 
 - **Part 3**: Repeated the analysis for the S&P portfolio. We have build a data file, build signals, and repeat the model estimation process with our new dataset.
-```python
+
 ## The IRL-based model of stock returns
 
 We know that optimal investment policy in the problem of inverse portfolio optimization is a Gaussian policy
@@ -90,7 +90,7 @@ St. Andrews Economics Preprints}, 2007). We have found that such dynamics (in a 
 
 (For more details, see I. Halperin and I. Feldshteyn, "Market Self-Learning of Signals, Impact and Optimal Trading: Invisible Hand Inference with Free Energy.
 (or, How We Learned to Stop Worrying and Love Bounded Rationality)", https://papers.ssrn.com/sol3/papers.cfm?abstract\_id=3174498) 
-```
+
 
 
 ## Conclusion:
